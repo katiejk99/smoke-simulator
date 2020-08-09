@@ -36,13 +36,13 @@ function loadFiles(path, fileNames, callback) {
     for (var i = 0; i < fileNames.length; i += 1) {
         var name = fileNames[i];
         var url = path + '/' + name;
-        (function() {
+        (function(fileName) {
             var fr = new XMLHttpRequest();
             fr.open("GET", url, true);
             fr.onreadystatechange = function() {
                 if (fr.readyState === XMLHttpRequest.DONE) {
                     if (fr.status === 200 || fr.status === 0) {
-                        files.set(name, fr.responseText);
+                        files.set(fileName, fr.responseText);
                     }
                     filesToLoad -= 1;
                     if (filesToLoad === 0) {
@@ -51,13 +51,24 @@ function loadFiles(path, fileNames, callback) {
                 }
             }
             fr.send();
-        })();
+        })(name);
     }
 }
 
 function init(loadedFiles) {
-    var slabOp = new SlabOps(loadedFiles);
-    console.log(slabOp.advect);
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight); // Set renderer canvas size;
+    document.body.appendChild(renderer.domElement);
+
+    var slabOp = new SlabOps(loadedFiles, renderer, 256, 256); // FIXME: grid size
+    var colorizer = new Colorizer(loadedFiles, Slab.camera, new THREE.PlaneBufferGeometry(2, 2));
+
+    var animate = function() {
+        requestAnimationFrame(animate);
+        slabOp.step();
+        colorizer.render2D(renderer, slabOp.slabs.advect.slab);
+    }
+    animate();
 }
 
-loadFiles('shaders', REQUIRED_SHADER_FILES, init);
+loadFiles('shaders', SLABOPS_REQUIRED_SHADER_FILES.concat(COLOR_REQUIRED_SHADER_FILES), init);
