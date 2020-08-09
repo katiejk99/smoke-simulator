@@ -1,16 +1,16 @@
 //Divergence operation
 
-uniform sampler2D w //velocity
+uniform sampler2D w; //velocity
 
-uniform float gridScale //dX
-uniform vec2 gridSpec //width and height for normalization
+uniform float gridScale; //dX
+uniform vec2 gridSpec; //width and height for normalization
 
 void main() {
 
     vec2 uv = gl_FragCoord.xy / gridSpec.xy; //normalized uv coordinates
     
     vec2 uv_xoffset = vec2(1.0 / gridSpec.x, 0.0);
-    vec2 uv_yoffset = vec2(0.0, 1.0 / gradSpec.y);
+    vec2 uv_yoffset = vec2(0.0, 1.0 / gridSpec.y);
     
     //Pressure of neighbors
     float l = texture2D(w, uv - uv_xoffset).x;
@@ -18,7 +18,7 @@ void main() {
     float b = texture2D(w, uv - uv_yoffset).y;
     float t = texture2D(w, uv + uv_yoffset).y;
     
-    float scale = 0.5 / gradScale; // (1 / 2dX);
+    float scale = 0.5 / gridScale; // (1 / 2dX);
     
     float divergence = scale * ((r - l) + (t - b));
     

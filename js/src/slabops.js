@@ -38,16 +38,27 @@ Slab.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 Slab.defaultGeometry = new THREE.PlaneBufferGeometry(2, 2);
 
 
-var SLABOPS_SHADER_NAMES = {advect: 'advect.fs', test: 'test.fs'};
+var SLABOPS_SHADER_NAMES = {
+    advect: 'advect.fs',
+    divergence: 'Divergence.fs',
+    pressure: 'JacobiVectors.fs',
+    gradient: 'Gradient.fs',
+    test: 'test.fs'};
 
 var SLABOPS_REQUIRED_SHADER_FILES = [
     SLABOPS_SHADER_NAMES.advect,
+    SLABOPS_SHADER_NAMES.divergence,
+    SLABOPS_SHADER_NAMES.pressure,
+    SLABOPS_SHADER_NAMES.gradient,
     SLABOPS_SHADER_NAMES.test
 ];
 
 // Add default values?
 var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
     this.renderer = renderer;
+    this.slabSize = {width: slabWidth, height: slabHeight};
+    this.gridScale = 1;
+    var gridSpecValue = new THREE.Vector2(this.slabSize.width, this.slabSize.height);
 
 
     // Create the uniform and slab object for each slab type
@@ -62,11 +73,11 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
         },
         gridSpec: {
             type: 'v2',
-            value: new THREE.Vector2(slabWidth, slabHeight)
+            value: gridSpecValue
         },
         gridScale: {
             type: 'f',
-            value: 1
+            value: this.gridScale
         },
         time: {
             type: 'f',
@@ -78,12 +89,77 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
         }
     };
 
-    this.advect.slab =  new Slab(slabWidth, slabHeight, shaderFiles.get(SLABOPS_SHADER_NAMES.advect), this.advect.uniforms);
+    this.advect.slab =  new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.advect), this.advect.uniforms);
+
+    // Divergence
+    this.divergence = {};
+    this.divergence.uniforms = {
+        w: {
+            type: 't'
+        },
+        gridSpec: {
+            type: 'v2',
+            value: gridSpecValue
+        },
+        gridScale: {
+            type: 'f',
+            value: this.gridScale
+        }
+    };
+
+    this.divergence.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.divergence), this.divergence.uniforms);
+
+    // Pressure
+    this.pressure = {};
+    this.pressure.uniforms = {
+        x: {
+            type: 't'
+        },
+        b: {
+            type: 't'
+        },
+        gridSpec: {
+            type: 'v2',
+            value: gridSpecValue
+        },
+        alpha: {
+            type: 'f',
+            value: -this.gridScale * this.gridScale
+        },
+        beta: {
+            type: 'f',
+            value: 4
+        }
+    };
+
+    this.pressure.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.pressure), this.pressure.uniforms);
+
+    // Gradient
+    this.gradient = {};
+    this.gradient.uniforms = {
+        p: {
+            type: 't'
+        },
+        w: {
+            type: 't'
+        },
+        gridSpec: {
+            type: 'v2',
+            value: gridSpecValue
+        },
+        gridScale: {
+            type: 'f',
+            value: this.gridScale
+        }
+    };
+
+    this.gradient.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.gradient), this.gradient.uniforms);
+
 
     // Test
     this.test = {};
     this.test.uniforms = {};
-    this.test.slab =  new Slab(slabWidth, slabHeight, shaderFiles.get(SLABOPS_SHADER_NAMES.test), this.test.uniforms);
+    this.test.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.test), this.test.uniforms);
 
     this.count = 0;
 }
@@ -99,6 +175,7 @@ SlabOps.prototype = {
             this.renderer.render(this.test.slab.scene, Slab.camera);
         } 
         this.advectSlab(this.advect.slab);
+        this.projectSlab(this.advect.slab);
     },
 
     advectSlab: function(slab) {
@@ -108,6 +185,32 @@ SlabOps.prototype = {
         this.renderer.setRenderTarget(slab.temp);
         //this.renderer.setRenderTarget(null);
         this.renderer.render(this.advect.slab.scene, Slab.camera);
+        slab.swap();
+    },
+
+    projectSlab: function(slab) {
+        // Divergence
+        this.divergence.uniforms.w.value = slab.state.texture;
+        this.renderer.setRenderTarget(this.divergence.slab.temp);
+        this.renderer.render(this.divergence.slab.scene, Slab.camera);
+        this.divergence.slab.swap();
+
+        // Pressure
+        this.pressure.uniforms.b.value = this.divergence.slab.state.texture;
+        this.renderer.setRenderTarget(this.pressure.slab.state);
+        this.renderer.clear();
+        for (var i = 0; i < 50; i += 1) {
+            this.pressure.uniforms.x.value = this.pressure.slab.state.texture;
+            this.renderer.setRenderTarget(this.pressure.slab.temp);
+            this.renderer.render(this.pressure.slab.scene, Slab.camera);
+            this.pressure.slab.swap();
+        }
+
+        // Gradient
+        this.gradient.uniforms.p.value = this.pressure.slab.state.texture;
+        this.gradient.uniforms.w.value = slab.state.texture;
+        this.renderer.setRenderTarget(slab.temp);
+        this.renderer.render(this.gradient.slab.scene, Slab.camera);
         slab.swap();
     }
 
