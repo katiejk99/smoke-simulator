@@ -23,7 +23,7 @@ vec2 lerp(sampler2D s, vec2 position) {
     vec2 s12 = texture2D(s, vec2(uv1.x, uv2.y)).xy;
     vec2 s21 = texture2D(s, vec2(uv2.x, uv1.y)).xy;
     
-    vec2 advect = p - uv1.xy;
+    vec2 advect = position - uv1.xy;
 
     return mix(mix(s11, s21, advect.x), mix(s12, s22, advect.x), advect.y);
     
