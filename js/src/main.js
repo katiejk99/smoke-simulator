@@ -61,12 +61,12 @@ function init(loadedFiles) {
     document.body.appendChild(renderer.domElement);
 
     var slabOp = new SlabOps(loadedFiles, renderer, 256, 256); // FIXME: grid size
-    var colorizer = new Colorizer(loadedFiles, Slab.camera, new THREE.PlaneBufferGeometry(2, 2));
+    var colorizer = new Colorizer(loadedFiles, Slab.camera, Slab.defaultGeometry);
 
     var animate = function() {
         requestAnimationFrame(animate);
         slabOp.step();
-        colorizer.render2D(renderer, slabOp.slabs.advect.slab);
+        colorizer.render2D(renderer, slabOp.advect.slab);
     }
     animate();
 }

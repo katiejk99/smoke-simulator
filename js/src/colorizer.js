@@ -34,7 +34,7 @@ Colorizer.prototype = {
     constructor: Colorizer,
 
     render2D: function(renderer, slab) {
-        this.color2D.uniforms.slab.value = slab.texture;
+        this.color2D.uniforms.slab.value = slab.state.texture;
         renderer.setRenderTarget(null);
         renderer.getSize(this.color2D.uniforms.gridSpec.value);
         renderer.render(this.color2D.scene, this.camera);

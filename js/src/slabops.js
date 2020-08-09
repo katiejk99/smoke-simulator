@@ -2,9 +2,12 @@
 
 // Slab class
 function Slab(width, height, fs, uniforms) {
-    this.name = name;
-    this.slab = new THREE.WebGLRenderTarget(width, height, {depthBuffer: false, stencilBuffer: false, type: THREE.FloatType});
-    this.temp = this.slab.clone();
+    this.state = new THREE.WebGLRenderTarget(width, height, {
+        depthBuffer: false,
+        stencilBuffer: false,
+        type: THREE.FloatType // This is necessary! If left to the default UnsignedByteBuffer, the texture will zero any negative fragment values.
+    });
+    this.temp = this.state.clone();
 
     // Create the environment for the slab
     var geometry = new THREE.PlaneBufferGeometry(2 * (width - 2) / width, 2 * (height - 2) / height); // Plane is almost 2x2, we make it slightly smaller for boundary conditions
@@ -26,70 +29,86 @@ function Slab(width, height, fs, uniforms) {
 
 Slab.prototype.swap = function () {
     var tmp = this.temp;
-    this.temp = this.slab;
-    this.slab = tmp;
+    this.temp = this.state;
+    this.state = tmp;
 }
 
 Slab.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
+Slab.defaultGeometry = new THREE.PlaneBufferGeometry(2, 2);
 
-var SLABOPS_SHADER_NAMES = {advect: 'test.fs'};
 
-var SLABOPS_REQUIRED_SHADER_FILES = [SLABOPS_SHADER_NAMES.advect];
+var SLABOPS_SHADER_NAMES = {advect: 'advect.fs', test: 'test.fs'};
+
+var SLABOPS_REQUIRED_SHADER_FILES = [
+    SLABOPS_SHADER_NAMES.advect,
+    SLABOPS_SHADER_NAMES.test
+];
 
 // Add default values?
 var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
     this.renderer = renderer;
-    // Create the uniforms for each slab
-    // We just set the types for the uniforms for now. We'll update the values during step()
-    this.uniforms = {
-        advect: {
-            velocity: {
-                type: 't'
-            },
-            advected: {
-                type: 't'
-            },
-            gridSpec: {
-                type: 'v2',
-                value: new THREE.Vector2(slabWidth, slabHeight)
-            },
-            gridScale: {
-                type: 'f',
-                value: 1
-            },
-            time: {
-                type: 'f',
-                value: 1
-            },
-            dissipation: {
-                type: 'f',
-                value: 1
-            }
+
+
+    // Create the uniform and slab object for each slab type
+    // Advection
+    this.advect = {};
+    this.advect.uniforms = {
+        velocity: {
+            type: 't'
+        },
+        advected: {
+            type: 't'
+        },
+        gridSpec: {
+            type: 'v2',
+            value: new THREE.Vector2(slabWidth, slabHeight)
+        },
+        gridScale: {
+            type: 'f',
+            value: 1
+        },
+        time: {
+            type: 'f',
+            value: 1
+        },
+        dissipation: {
+            type: 'f',
+            value: 1
         }
     };
 
-    // Create the slabs
-    this.slabs = {
-        advect: new Slab(slabWidth, slabHeight, shaderFiles.get(SLABOPS_SHADER_NAMES.advect), this.uniforms.advect)
-    };
+    this.advect.slab =  new Slab(slabWidth, slabHeight, shaderFiles.get(SLABOPS_SHADER_NAMES.advect), this.advect.uniforms);
+
+    // Test
+    this.test = {};
+    this.test.uniforms = {};
+    this.test.slab =  new Slab(slabWidth, slabHeight, shaderFiles.get(SLABOPS_SHADER_NAMES.test), this.test.uniforms);
+
+    this.count = 0;
 }
 
 SlabOps.prototype = {
     constructor: SlabOps,
 
     step: function() {
-        this.advect(this.slabs.advect);
+        if (this.count < 1) {
+            this.count += 1;
+            this.renderer.setRenderTarget(this.advect.slab.state);
+            //this.renderer.setRenderTarget(null);
+            this.renderer.render(this.test.slab.scene, Slab.camera);
+        } 
+        this.advectSlab(this.advect.slab);
     },
 
-    advect: function(slabToAdvect) {
+    advectSlab: function(slab) {
         // Advection
-        this.uniforms.advect.velocity.value = this.slabs.advect.slab.texture;
-        this.uniforms.advect.advected.value = slabToAdvect.slab.texture;
-        this.renderer.setRenderTarget(slabToAdvect.temp);
+        this.advect.uniforms.velocity.value = this.advect.slab.state.texture;
+        this.advect.uniforms.advected.value = slab.state.texture;
+        this.renderer.setRenderTarget(slab.temp);
         //this.renderer.setRenderTarget(null);
-        this.renderer.render(this.slabs.advect.scene, Slab.camera);
-        slabToAdvect.swap();
+        this.renderer.render(this.advect.slab.scene, Slab.camera);
+        slab.swap();
     }
 
     
