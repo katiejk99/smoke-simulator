@@ -76,9 +76,11 @@ function init(loadedFiles) {
             splatPosition.y = 1 - splatPosition.y;
             // Add splats
             slabOp.splatSlab(slabOp.buoyancy.slab, splatPosition, new THREE.Vector3(0.7, 1, 0), 0.075);
+            slabOp.splatSlab(slabOp.ink.slab, splatPosition, new THREE.Vector3(1, 0, 0), 0.075);
         }
         slabOp.step();
-        colorizer.render2D(renderer, slabOp.advect.slab);
+        colorizer.renderIdentity(renderer, slabOp.ink.slab);
+        //colorizer.render2D(renderer, slabOp.advect.slab);
     }
     animate();
 }

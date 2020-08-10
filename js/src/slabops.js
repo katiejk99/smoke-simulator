@@ -45,6 +45,7 @@ var SLABOPS_SHADER_NAMES = {
     gradient: 'Gradient.fs',
     splat: 'splat.fs',
     buoyancy: 'buoyancy.fs',
+    copy: 'copy.fs',
     test: 'test.fs'};
 
 var SLABOPS_REQUIRED_SHADER_FILES = [
@@ -54,6 +55,7 @@ var SLABOPS_REQUIRED_SHADER_FILES = [
     SLABOPS_SHADER_NAMES.gradient,
     SLABOPS_SHADER_NAMES.splat,
     SLABOPS_SHADER_NAMES.buoyancy,
+    SLABOPS_SHADER_NAMES.copy,
     SLABOPS_SHADER_NAMES.test
 ];
 
@@ -215,6 +217,19 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
 
     this.splat.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.splat), this.splat.uniforms);
 
+    // Ink
+    this.ink = {};
+    this.ink.uniforms = {
+        slab: {
+            type: 't'
+        },
+        gridSpec: {
+            type: 'v2',
+            value: gridSpecValue
+        }
+    }; // No shader needed for ink
+    this.ink.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.copy), this.ink.uniforms);
+
 
     // Test
     this.test = {};
@@ -234,6 +249,7 @@ SlabOps.prototype = {
             //this.renderer.setRenderTarget(null);
             this.renderer.render(this.test.slab.scene, Slab.camera);
         }
+        this.advectSlab(this.ink.slab);
         this.advectSlab(this.buoyancy.slab);
         this.advectSlab(this.advect.slab);
         this.buoySlab(this.advect.slab);
