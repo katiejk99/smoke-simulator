@@ -43,6 +43,8 @@ var SLABOPS_SHADER_NAMES = {
     divergence: 'Divergence.fs',
     pressure: 'JacobiVectors.fs',
     gradient: 'Gradient.fs',
+    splat: 'splat.fs',
+    buoyancy: 'buoyancy.fs',
     test: 'test.fs'};
 
 var SLABOPS_REQUIRED_SHADER_FILES = [
@@ -50,6 +52,8 @@ var SLABOPS_REQUIRED_SHADER_FILES = [
     SLABOPS_SHADER_NAMES.divergence,
     SLABOPS_SHADER_NAMES.pressure,
     SLABOPS_SHADER_NAMES.gradient,
+    SLABOPS_SHADER_NAMES.splat,
+    SLABOPS_SHADER_NAMES.buoyancy,
     SLABOPS_SHADER_NAMES.test
 ];
 
@@ -155,6 +159,62 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
 
     this.gradient.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.gradient), this.gradient.uniforms);
 
+    // Buoyancy = Density + Temperature
+    this.buoyancy = {};
+    this.buoyancy.uniforms = {
+        v: {
+            type: 't'
+        },
+        b: {
+            type: 't'
+        },
+        gridSpec: {
+            type: 'v2',
+            value: gridSpecValue
+        },
+        densityScale: {
+            type: 'f',
+            value: 1
+        },
+        tempScale: {
+            type: 'f',
+            value: 1
+        },
+        ambientTemp: {
+            type: 'f',
+            value: 0
+        },
+        time: {
+            type: 'f',
+            value: 1
+        }
+    }
+
+    this.buoyancy.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.buoyancy), this.buoyancy.uniforms);
+
+    // Splat
+    this.splat = {};
+    this.splat.uniforms = {
+        slab: {
+            type: 't'
+        },
+        gridSpec: {
+            type: 'v2',
+            value: gridSpecValue
+        },
+        splatValue: {
+            type: 'v3'
+        },
+        center: {
+            type: 'v2'
+        },
+        radius: {
+            type: 'f',
+        }
+    }
+
+    this.splat.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.splat), this.splat.uniforms);
+
 
     // Test
     this.test = {};
@@ -173,8 +233,10 @@ SlabOps.prototype = {
             this.renderer.setRenderTarget(this.advect.slab.state);
             //this.renderer.setRenderTarget(null);
             this.renderer.render(this.test.slab.scene, Slab.camera);
-        } 
+        }
+        this.advectSlab(this.buoyancy.slab);
         this.advectSlab(this.advect.slab);
+        this.buoySlab(this.advect.slab);
         this.projectSlab(this.advect.slab);
     },
 
@@ -211,6 +273,25 @@ SlabOps.prototype = {
         this.gradient.uniforms.w.value = slab.state.texture;
         this.renderer.setRenderTarget(slab.temp);
         this.renderer.render(this.gradient.slab.scene, Slab.camera);
+        slab.swap();
+    },
+
+    splatSlab: function(slab, uv, value, radius) {
+        this.splat.uniforms.center.value = new THREE.Vector2(this.slabSize.width * uv.x, this.slabSize.height * uv.y);
+        this.splat.uniforms.splatValue.value = value;
+        this.splat.uniforms.radius.value = radius * Math.min(this.slabSize.width, this.slabSize.height);
+        this.splat.uniforms.slab.value = slab.state.texture;
+        this.renderer.setRenderTarget(slab.temp);
+        //this.renderer.setRenderTarget(null);
+        this.renderer.render(this.splat.slab.scene, Slab.camera);
+        slab.swap();
+    },
+
+    buoySlab: function(slab) {
+        this.buoyancy.uniforms.v.value = slab.state.texture;
+        this.buoyancy.uniforms.b.value = this.buoyancy.slab.state.texture;
+        this.renderer.setRenderTarget(slab.temp);
+        this.renderer.render(this.buoyancy.slab.scene, Slab.camera);
         slab.swap();
     }
 

@@ -56,15 +56,27 @@ function loadFiles(path, fileNames, callback) {
 }
 
 function init(loadedFiles) {
+    // Create Renderer
     var renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight); // Set renderer canvas size;
+    renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    // Create SlabOps, Colorizer
     var slabOp = new SlabOps(loadedFiles, renderer, 256, 256); // FIXME: grid size
+    //renderer.setSize(256, 256, false);
     var colorizer = new Colorizer(loadedFiles, Slab.camera, Slab.defaultGeometry);
+    var mouseHandler = new MouseHandler();
 
     var animate = function() {
         requestAnimationFrame(animate);
+        if (mouseHandler.leftClick) {
+            var splatPosition = mouseHandler.position.clone();
+            splatPosition.x /= window.innerWidth;
+            splatPosition.y /= window.innerHeight;
+            splatPosition.y = 1 - splatPosition.y;
+            // Add splats
+            slabOp.splatSlab(slabOp.buoyancy.slab, splatPosition, new THREE.Vector3(0.7, 1, 0), 0.075);
+        }
         slabOp.step();
         colorizer.render2D(renderer, slabOp.advect.slab);
     }
