@@ -1,1 +1,1 @@
-# CS184-final
+# Smoke Simulator using WebGL and Three.js
