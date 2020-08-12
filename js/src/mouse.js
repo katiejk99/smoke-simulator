@@ -11,7 +11,6 @@ MouseHandler.prototype = {
     constructor: MouseHandler,
 
     mouseDown: function(event) {
-        event.preventDefault();
         this.position.set(event.clientX, event.clientY);
         this.leftClick = event.button === 0 ? true : this.leftClick;
     },

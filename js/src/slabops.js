@@ -45,8 +45,8 @@ var SLABOPS_SHADER_NAMES = {
     gradient: 'Gradient.fs',
     splat: 'splat.fs',
     buoyancy: 'buoyancy.fs',
-    copy: 'copy.fs',
-    test: 'test.fs'};
+    copy: 'sampleRGB.fs'
+};
 
 var SLABOPS_REQUIRED_SHADER_FILES = [
     SLABOPS_SHADER_NAMES.advect,
@@ -55,8 +55,7 @@ var SLABOPS_REQUIRED_SHADER_FILES = [
     SLABOPS_SHADER_NAMES.gradient,
     SLABOPS_SHADER_NAMES.splat,
     SLABOPS_SHADER_NAMES.buoyancy,
-    SLABOPS_SHADER_NAMES.copy,
-    SLABOPS_SHADER_NAMES.test
+    SLABOPS_SHADER_NAMES.copy
 ];
 
 // Add default values?
@@ -210,8 +209,8 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
         center: {
             type: 'v2'
         },
-        radius: {
-            type: 'f',
+        radii: {
+            type: 'vec2',
         }
     }
 
@@ -226,29 +225,23 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
         gridSpec: {
             type: 'v2',
             value: gridSpecValue
+        },
+        bias: {
+            type: 'f',
+            value: 0
+        },  
+        scale: {
+            type: 'f',
+            value: 1
         }
-    }; // No shader needed for ink
+    };
     this.ink.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.copy), this.ink.uniforms);
-
-
-    // Test
-    this.test = {};
-    this.test.uniforms = {};
-    this.test.slab = new Slab(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.test), this.test.uniforms);
-
-    this.count = 0;
 }
 
 SlabOps.prototype = {
     constructor: SlabOps,
 
     step: function() {
-        if (this.count < 1) {
-            this.count += 1;
-            this.renderer.setRenderTarget(this.advect.slab.state);
-            //this.renderer.setRenderTarget(null);
-            this.renderer.render(this.test.slab.scene, Slab.camera);
-        }
         this.advectSlab(this.ink.slab);
         this.advectSlab(this.buoyancy.slab);
         this.advectSlab(this.advect.slab);
@@ -295,7 +288,7 @@ SlabOps.prototype = {
     splatSlab: function(slab, uv, value, radius) {
         this.splat.uniforms.center.value = new THREE.Vector2(this.slabSize.width * uv.x, this.slabSize.height * uv.y);
         this.splat.uniforms.splatValue.value = value;
-        this.splat.uniforms.radius.value = radius * Math.min(this.slabSize.width, this.slabSize.height);
+        this.splat.uniforms.radii.value = new THREE.Vector2(radius * this.slabSize.width, radius * this.slabSize.height);
         this.splat.uniforms.slab.value = slab.state.texture;
         this.renderer.setRenderTarget(slab.temp);
         //this.renderer.setRenderTarget(null);

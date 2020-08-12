@@ -55,6 +55,8 @@ function loadFiles(path, fileNames, callback) {
     }
 }
 
+
+
 function init(loadedFiles) {
     // Create Renderer
     var renderer = new THREE.WebGLRenderer();
@@ -62,10 +64,101 @@ function init(loadedFiles) {
     document.body.appendChild(renderer.domElement);
 
     // Create SlabOps, Colorizer
-    var slabOp = new SlabOps(loadedFiles, renderer, 256, 256); // FIXME: grid size
+    var slabOp = new SlabOps(loadedFiles, renderer, 512, 256); // FIXME: grid size
     //renderer.setSize(256, 256, false);
     var colorizer = new Colorizer(loadedFiles, Slab.camera, Slab.defaultGeometry);
     var mouseHandler = new MouseHandler();
+
+    // Default values
+    var slabParams = {
+        ink: 'Ink',
+        advect: 'Velocity',
+        density: 'Density',
+        temperature: 'Temperature',
+        divergence: 'Divergence',
+        pressure: 'Pressure'
+    };
+    var guiParams = {
+        'Slab': slabParams.ink,
+        'Radius': 10,
+        inkGuiParams: {
+            'Ink Color': '#FF7F00'
+        },
+        temperatureGuiParams: {
+            "Rel. Temp": 0.3,
+            'Min. Color': '#007FFF',
+            'Max. Color': '#FF7F00'
+        },
+        densityGuiParams: {
+            "Rel. Density": 0.2,
+            'Min. Color': '#000000',
+            'Max. Color': '#FFFFFF'
+        }
+    };
+
+    // Init GUI
+    var gui = new dat.GUI();
+    var slabController = gui.add(guiParams, "Slab", [slabParams.ink, slabParams.density, slabParams.temperature, slabParams.advect, slabParams.divergence, slabParams.pressure]);
+    gui.add(guiParams, "Radius", 1, 100, 1);
+    gui.addFolder("Ink").addColor(guiParams.inkGuiParams, 'Ink Color');
+    var temperatureGui = gui.addFolder("Temperature");
+    temperatureGui.add(guiParams.temperatureGuiParams, "Rel. Temp", -1, 1, 0.05);
+    temperatureGui.addColor(guiParams.temperatureGuiParams, "Min. Color").onChange(function() {updateColorizer()});
+    temperatureGui.addColor(guiParams.temperatureGuiParams, "Max. Color").onChange(function() {updateColorizer()});
+    var densityGui = gui.addFolder("Density");
+    densityGui.add(guiParams.densityGuiParams, "Rel. Density", -1, 1, 0.05);
+    densityGui.addColor(guiParams.densityGuiParams, "Min. Color").onChange(function() {updateColorizer()});
+    densityGui.addColor(guiParams.densityGuiParams, "Max. Color").onChange(function() {updateColorizer()});
+
+
+    var colorizerRenderFunction = null;
+    var updateColorizer = function() {
+        switch(slabController.getValue()) {
+            case slabParams.ink:
+                colorizer.setRange(0, 1);
+                colorizerRenderFunction = function(renderer) {
+                    return colorizer.renderIdentity(renderer, slabOp.ink.slab);
+                }
+                break;
+            case slabParams.density:
+                colorizer.setColorRange(guiParams.densityGuiParams['Min. Color'], guiParams.densityGuiParams['Max. Color']);
+                colorizer.setRange(-2, 2);
+                colorizerRenderFunction = function(renderer) {
+                    return colorizer.renderScalarR(renderer, slabOp.buoyancy.slab);
+                }
+                break;
+            case slabParams.temperature:
+                colorizer.setColorRange(guiParams.temperatureGuiParams['Min. Color'], guiParams.temperatureGuiParams['Max. Color']);
+                colorizer.setRange(-2, 2);
+                colorizerRenderFunction = function(renderer) {
+                    return colorizer.renderScalarG(renderer, slabOp.buoyancy.slab);
+                }
+                break;
+            case slabParams.advect:
+                colorizer.setRange(0, 5);
+                colorizerRenderFunction = function(renderer) {
+                    return colorizer.render2D(renderer, slabOp.advect.slab);
+                }
+                break;
+            case slabParams.divergence:
+                // Set color range
+                colorizer.setRange(-5, 5);
+                colorizerRenderFunction = function(renderer) {
+                    return colorizer.renderScalarR(renderer, slabOp.divergence.slab);
+                }
+            break;
+            case slabParams.pressure:
+                // Set color range
+                colorizer.setRange(-5, 5);
+                colorizerRenderFunction = function(renderer) {
+                    return colorizer.renderScalarR(renderer, slabOp.pressure.slab);
+                }
+            break;
+        }
+    }
+    updateColorizer();
+    slabController.onChange(updateColorizer);
+
 
     var animate = function() {
         requestAnimationFrame(animate);
@@ -75,11 +168,14 @@ function init(loadedFiles) {
             splatPosition.y /= window.innerHeight;
             splatPosition.y = 1 - splatPosition.y;
             // Add splats
-            slabOp.splatSlab(slabOp.buoyancy.slab, splatPosition, new THREE.Vector3(0.7, 1, 0), 0.075);
-            slabOp.splatSlab(slabOp.ink.slab, splatPosition, new THREE.Vector3(1, 0, 0), 0.075);
+            var radius = guiParams["Radius"] / 100;
+            var inkColor = new THREE.Color(guiParams.inkGuiParams['Ink Color']);
+            slabOp.splatSlab(slabOp.buoyancy.slab, splatPosition, new THREE.Vector3(guiParams.densityGuiParams['Rel. Density'], guiParams.temperatureGuiParams["Rel. Temp"], 0), radius);
+            slabOp.splatSlab(slabOp.ink.slab, splatPosition, new THREE.Vector3(inkColor.r, inkColor.g, inkColor.b), radius);
         }
         slabOp.step();
-        colorizer.renderIdentity(renderer, slabOp.ink.slab);
+        colorizerRenderFunction(renderer);
+        //colorizer.renderIdentity(renderer, slabOp.ink.slab);
         //colorizer.render2D(renderer, slabOp.advect.slab);
     }
     animate();

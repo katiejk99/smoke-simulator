@@ -3,7 +3,8 @@
 uniform sampler2D slab;
 
 uniform vec2 gridSpec;
-uniform float maxMag;
+uniform float bias;
+uniform float scale;
 
 // Found this here: https://news.ycombinator.com/item?id=21156680
 vec3 coolhue2(float h){
@@ -27,8 +28,7 @@ vec3 hsv2rgb(vec3 c) {
 void main() {
     vec2 uv = gl_FragCoord.xy / gridSpec.xy;
     vec2 vec = texture2D(slab, uv).xy;
-    float v = clamp(length(vec), 0.0, maxMag) / maxMag;
+    float v = clamp(length(vec) * scale + bias, 0.0, 1.0);
     float h = (atan(vec.y, vec.x)) / (2.0 * PI);
     gl_FragColor = vec4(hsv2rgb(vec3(h, 1.0, v)), 1.0);
-    //gl_FragColor = texture2D(slab, uv);
 }
