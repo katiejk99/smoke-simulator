@@ -93,6 +93,11 @@ function init(loadedFiles) {
             "Rel. Density": 0.2,
             'Min. Color': '#000000',
             'Max. Color': '#FFFFFF'
+        },
+        pressureGuiParams: {
+            "Num. Iterations": slabOp.numPressureIterations,
+            'Min. Color': '#000000',
+            'Max. Color': '#FFFFFF'
         }
     };
 
@@ -109,6 +114,10 @@ function init(loadedFiles) {
     densityGui.add(guiParams.densityGuiParams, "Rel. Density", -1, 1, 0.05);
     densityGui.addColor(guiParams.densityGuiParams, "Min. Color").onChange(function() {updateColorizer()});
     densityGui.addColor(guiParams.densityGuiParams, "Max. Color").onChange(function() {updateColorizer()});
+    var pressureGui = gui.addFolder("Pressure");
+    pressureGui.add(guiParams.pressureGuiParams, "Num. Iterations", 0, 80, 1).onChange(function() {slabOp.numPressureIterations = guiParams.pressureGuiParams['Num. Iterations']});
+    pressureGui.addColor(guiParams.pressureGuiParams, "Min. Color").onChange(function() {updateColorizer()});
+    pressureGui.addColor(guiParams.pressureGuiParams, "Max. Color").onChange(function() {updateColorizer()});
 
 
     var colorizerRenderFunction = null;
@@ -149,7 +158,7 @@ function init(loadedFiles) {
             break;
             case slabParams.pressure:
                 // Set color range
-                colorizer.setRange(-5, 5);
+                colorizer.setRange(-3, 3);
                 colorizerRenderFunction = function(renderer) {
                     return colorizer.renderScalarR(renderer, slabOp.pressure.slab);
                 }

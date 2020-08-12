@@ -63,6 +63,7 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
     this.renderer = renderer;
     this.slabSize = {width: slabWidth, height: slabHeight};
     this.gridScale = 1;
+    this.numPressureIterations = 30;
     var gridSpecValue = new THREE.Vector2(this.slabSize.width, this.slabSize.height);
 
 
@@ -270,7 +271,7 @@ SlabOps.prototype = {
         this.pressure.uniforms.b.value = this.divergence.slab.state.texture;
         this.renderer.setRenderTarget(this.pressure.slab.state);
         this.renderer.clear();
-        for (var i = 0; i < 50; i += 1) {
+        for (var i = 0; i < this.numPressureIterations; i += 1) {
             this.pressure.uniforms.x.value = this.pressure.slab.state.texture;
             this.renderer.setRenderTarget(this.pressure.slab.temp);
             this.renderer.render(this.pressure.slab.scene, Slab.camera);
