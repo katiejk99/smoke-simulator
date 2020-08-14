@@ -27,6 +27,90 @@ function Slab(width, height, fs, uniforms) {
     this.scene.add(new THREE.Mesh(geometry, material));
 }
 
+function Boundary(width, height, fs, uniforms) {
+	this.state = new THREE.WebGLRenderTarget(width, height, {
+        depthBuffer: false,
+        stencilBuffer: false,
+        type: THREE.FloatType // This is necessary! If left to the default UnsignedByteBuffer, the texture will zero any negative fragment values.
+    });
+    this.temp = this.state.clone();
+
+	var material = new THREE.ShaderMaterial({
+		uniforms: this.uniforms,
+		fragmentShader: fs,
+		depthWrite: false,
+		depthTest: false,
+		blending: THREE.NoBlending
+    });
+
+    var ax = (width - 2) / width;
+    var ay = (height - 2) / height;
+    var bx = (width - 1) / width;
+    var by = (height - 1) / height;
+
+    var positionL = [[-ax, -ay, 0], [-bx,  by, 0]];
+    var positionR = [[ ax, -ay, 0], [ bx,  by, 0]];
+    var positionB = [[-ax, -ay, 0], [ bx, -by, 0]];
+    var positionT = [[-ax,  ay, 0], [ bx,  by, 0]];
+
+    var verticesL = new Float32Array(positionL.length * 3);
+    var verticesR = new Float32Array(positionR.length * 3);
+    var verticesB = new Float32Array(positionB.length * 3);
+    var verticesT = new Float32Array(positionT.length * 3);
+
+    //Left Line
+    for (var i = 0; i < positionL.length; i++) {
+        verticesL[i * 3    ] = positionL[i][0];
+        verticesL[i * 3 + 1] = positionL[i][1];
+        verticesL[i * 3 + 2] = positionL[i][2];
+    }
+
+    var geometryL = new THREE.BufferGeometry();
+    geometryL.addAttribute('position', new THREE.BufferAttribute(verticesL, 3));
+    this.lineL = new THREE.Line(geometryL, material);
+
+    //Right Line
+    for (var i = 0; i < positionR.length; i++) {
+        verticesR[i * 3    ] = positionR[i][0];
+        verticesR[i * 3 + 1] = positionR[i][1];
+        verticesR[i * 3 + 2] = positionR[i][2];
+    }
+
+    var geometryR = new THREE.BufferGeometry();
+    geometryR.addAttribute('position', new THREE.BufferAttribute(verticesR, 3));
+    this.lineR = new THREE.Line(geometryR, material);
+
+    //Bottom Line
+    for (var i = 0; i < positionB.length; i++) {
+        verticesB[i * 3    ] = positionB[i][0];
+        verticesB[i * 3 + 1] = positionB[i][1];
+        verticesB[i * 3 + 2] = positionB[i][2];
+    }
+
+    var geometryB = new THREE.BufferGeometry();
+    geometryB.addAttribute('position', new THREE.BufferAttribute(verticesB, 3));
+    this.lineB = new THREE.Line(geometryB, material);
+
+
+    //Top Line
+    for (var i = 0; i < positionT.length; i++) {
+        verticesT[i * 3    ] = positionT[i][0];
+        verticesT[i * 3 + 1] = positionT[i][1];
+        verticesT[i * 3 + 2] = positionT[i][2];
+    }
+
+    var geometryT = new THREE.BufferGeometry();
+    geometryT.addAttribute('position', new THREE.BufferAttribute(verticesT, 3));
+    this.lineT = new THREE.Line(geometryT, material);
+
+
+    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    this.scene = new THREE.Scene();
+
+    this.gridOffset = new THREE.Vector3();
+
+}
+
 Slab.prototype.swap = function () {
     var tmp = this.temp;
     this.temp = this.state;
@@ -39,6 +123,7 @@ Slab.defaultGeometry = new THREE.PlaneBufferGeometry(2, 2);
 
 
 var SLABOPS_SHADER_NAMES = {
+	boundary: 'Boundary.fs',
     advect: 'Advection.fs',
     divergence: 'Divergence.fs',
     pressure: 'JacobiVectors.fs',
@@ -49,6 +134,7 @@ var SLABOPS_SHADER_NAMES = {
 };
 
 var SLABOPS_REQUIRED_SHADER_FILES = [
+	SLABOPS_SHADER_NAMES.boundary,
     SLABOPS_SHADER_NAMES.advect,
     SLABOPS_SHADER_NAMES.divergence,
     SLABOPS_SHADER_NAMES.pressure,
@@ -68,6 +154,28 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
 
 
     // Create the uniform and slab object for each slab type
+
+
+    //Boundary
+    this.boundary = {};
+    this.boundary.uniforms = {
+    	read: {
+            type: "t"
+        },
+        gridSpec: {
+            type: "v2",
+            value: gridSpecValue
+        },
+        gridOffset: {
+            type: "v2",
+            value: this.gridScale
+        },
+        gridScale: {
+            type: "f"
+        },
+    }
+    this.boundary.slab =  new Boundary(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.boundary), this.boundary.uniforms);
+
     // Advection
     this.advect = {};
     this.advect.uniforms = {
@@ -249,6 +357,23 @@ SlabOps.prototype = {
         this.buoySlab(this.advect.slab);
         this.projectSlab(this.advect.slab);
     },
+
+    boundarySlab: function(slab) {
+    	this.boundary.uniforms.read.value = this.velocity;
+
+        this.renderLine(renderer, this.lineL, [ 1,  0], this.velocity);
+        this.renderLine(renderer, this.lineR, [-1,  0], this.velocity);
+        this.renderLine(renderer, this.lineB, [ 0,  1], this.velocity);
+        this.renderLine(renderer, this.lineT, [ 0, -1], this.velocity);
+    }
+
+    renderLine: function(renderer, line, offset, output) {
+    	this.scene.add(line);
+        this.gridOffset.set(offset[0], offset[1]);
+        this.uniforms.gridOffset.value = this.gridOffset;
+        renderer.render(this.scene, Boundary.camera, output.write, false);
+        this.scene.remove(line);
+    }
 
     advectSlab: function(slab) {
         // Advection
