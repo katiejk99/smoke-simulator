@@ -170,7 +170,7 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
             type: "v2",
         },
         gridScale: {
-            type: "f"
+            type: "f",
             value: this.gridScale
         },
     };
@@ -353,26 +353,29 @@ SlabOps.prototype = {
     step: function() {
         this.advectSlab(this.ink.slab);
         this.advectSlab(this.buoyancy.slab);
-        this.advectSlab(this.advect.slab)
+        this.advectSlab(this.advect.slab);
+        this.boundarySlab(this.advect.slab);
         this.buoySlab(this.advect.slab);
         this.projectSlab(this.advect.slab);
     },
 
-    boundarySlab: function() {
-    	this.boundary.uniforms.read.value = this.this.advect.slab.state.texture;
+    boundarySlab: function(slab) {
+        this.renderLine(this.renderer, this.boundary.slab.lineL, [ 1,  0], slab);
+        this.renderLine(this.renderer, this.boundary.slab.lineR, [-1,  0], slab);
+        this.renderLine(this.renderer, this.boundary.slab.lineB, [ 0,  1], slab);
+        this.renderLine(this.renderer, this.boundary.slab.lineT, [ 0, -1], slab);
 
-        this.renderLine(this.renderer, this.boundary.slab.lineL, [ 1,  0], this.this.advect.slab.state.texture);
-        this.renderLine(this.renderer, this.boundary.slab.lineR, [-1,  0], this.this.advect.slab.state.texture);
-        this.renderLine(this.renderer, this.boundary.slab.lineB, [ 0,  1], this.this.advect.slab.state.texture);
-        this.renderLine(this.renderer, this.boundary.slab.lineT, [ 0, -1], this.this.advect.slab.state.texture);
     },
 
     renderLine: function(renderer, line, offset, output) {
-    	this.scene.add(line);
+        this.boundary.uniforms.read.value = output.state.texture;
+    	this.boundary.slab.scene.add(line);
         this.boundary.slab.gridOffset.set(offset[0], offset[1]);
         this.boundary.uniforms.gridOffset.value = this.boundary.slab.gridOffset;
-        this.renderer.render(this.boundary.slab.scene, Slab.camera, output.write, false);
-        this.scene.remove(line);
+        this.renderer.setRenderTarget(output.temp);
+        this.renderer.render(this.boundary.slab.scene, Slab.camera);
+        this.boundary.slab.scene.remove(line);
+        output.swap();
     },
 
     advectSlab: function(slab) {
