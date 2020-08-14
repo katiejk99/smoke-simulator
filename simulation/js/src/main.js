@@ -173,9 +173,9 @@ function init(loadedFiles) {
         requestAnimationFrame(animate);
         if (mouseHandler.leftClick) {
             var splatPosition = mouseHandler.position.clone();
-            splatPosition.x /= renderer.domElement.clientWidth;
-            splatPosition.y /= renderer.domElement.clientHeight;
-            splatPosition.y *= -1;
+            splatPosition.x /= renderer.domElement.clientWidth * 2 - 1;
+            splatPosition.y /= renderer.domElement.clientHeight * -2 + 1;
+            // splatPosition.y *= -1;
             // Add splats
             var radius = guiParams["Radius"] / 100;
             var inkColor = new THREE.Color(guiParams.inkGuiParams['Ink Color']);
