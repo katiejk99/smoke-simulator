@@ -173,8 +173,8 @@ function init(loadedFiles) {
         requestAnimationFrame(animate);
         if (mouseHandler.leftClick) {
             var splatPosition = mouseHandler.position.clone();
-            splatPosition.x /= window.innerWidth;
-            splatPosition.y /= window.innerHeight;
+            splatPosition.x /= renderer.domElement.clientWidth;
+            splatPosition.y /= renderer.domElement.clientHeight;
             splatPosition.y = 1 - splatPosition.y;
             // Add splats
             var radius = guiParams["Radius"] / 100;
