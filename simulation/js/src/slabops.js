@@ -123,8 +123,12 @@ Slab.defaultGeometry = new THREE.PlaneBufferGeometry(2, 2);
 
 
 var SLABOPS_SHADER_NAMES = {
+<<<<<<< HEAD
 	boundary: 'Boundary.fs',
     advect: 'Advection.fs',
+=======
+    advect: 'advect.fs',
+>>>>>>> parent of 8a9d630... Fixed Advection
     divergence: 'Divergence.fs',
     pressure: 'JacobiVectors.fs',
     gradient: 'Gradient.fs',
