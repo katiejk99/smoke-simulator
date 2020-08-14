@@ -39,7 +39,7 @@ Slab.defaultGeometry = new THREE.PlaneBufferGeometry(2, 2);
 
 
 var SLABOPS_SHADER_NAMES = {
-    advect: 'advect.fs',
+    advect: 'Advection.fs',
     divergence: 'Divergence.fs',
     pressure: 'JacobiVectors.fs',
     gradient: 'Gradient.fs',

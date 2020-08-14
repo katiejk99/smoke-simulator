@@ -13,6 +13,7 @@ vec3 bilerp(sampler2D d, vec2 p)
     ij.xy = floor(p - 0.5) + 0.5;
     ij.zw = ij.xy + 1.0;
 
+
     vec4 uv = ij / gridSpec.xyxy;
     vec3 d11 = texture2D(d, uv.xy).xyz;
     vec3 d21 = texture2D(d, uv.zy).xyz;
