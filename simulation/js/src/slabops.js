@@ -43,10 +43,10 @@ function Boundary(width, height, fs, uniforms) {
 		blending: THREE.NoBlending
     });
 
-    var ax = (width - 2) / width;
-    var ay = (height - 2) / height;
-    var bx = (width - 1) / width;
-    var by = (height - 1) / height;
+    var ax = (width - 2.0) / width;
+    var ay = (height - 2.0) / height;
+    var bx = (width - 1.0) / width;
+    var by = (height - 1.0) / height;
 
     var positionL = [[-ax, -ay, 0], [-bx,  by, 0]];
     var positionR = [[ ax, -ay, 0], [ bx,  by, 0]];
@@ -104,7 +104,7 @@ function Boundary(width, height, fs, uniforms) {
     this.lineT = new THREE.Line(geometryT, material);
 
 
-    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    // this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     this.scene = new THREE.Scene();
 
     this.gridOffset = new THREE.Vector3();
@@ -168,13 +168,13 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
         },
         gridOffset: {
             type: "v2",
-            value: this.gridScale
         },
         gridScale: {
             type: "f"
+            value: this.gridScale
         },
-    }
-    this.boundary.slab =  new Boundary(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.boundary), this.boundary.uniforms);
+    };
+    this.boundary.slab = new Boundary(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.boundary), this.boundary.uniforms);
 
     // Advection
     this.advect = {};
@@ -353,25 +353,25 @@ SlabOps.prototype = {
     step: function() {
         this.advectSlab(this.ink.slab);
         this.advectSlab(this.buoyancy.slab);
-        this.advectSlab(this.advect.slab);
+        this.advectSlab(this.advect.slab)
         this.buoySlab(this.advect.slab);
         this.projectSlab(this.advect.slab);
     },
 
-    boundarySlab: function(slab) {
-    	this.boundary.uniforms.read.value = this.velocity;
+    boundarySlab: function() {
+    	this.boundary.uniforms.read.value = this.this.advect.slab.state.texture;
 
-        this.renderLine(renderer, this.lineL, [ 1,  0], this.velocity);
-        this.renderLine(renderer, this.lineR, [-1,  0], this.velocity);
-        this.renderLine(renderer, this.lineB, [ 0,  1], this.velocity);
-        this.renderLine(renderer, this.lineT, [ 0, -1], this.velocity);
+        this.renderLine(this.renderer, this.boundary.slab.lineL, [ 1,  0], this.this.advect.slab.state.texture);
+        this.renderLine(this.renderer, this.boundary.slab.lineR, [-1,  0], this.this.advect.slab.state.texture);
+        this.renderLine(this.renderer, this.boundary.slab.lineB, [ 0,  1], this.this.advect.slab.state.texture);
+        this.renderLine(this.renderer, this.boundary.slab.lineT, [ 0, -1], this.this.advect.slab.state.texture);
     },
 
     renderLine: function(renderer, line, offset, output) {
     	this.scene.add(line);
-        this.gridOffset.set(offset[0], offset[1]);
-        this.uniforms.gridOffset.value = this.gridOffset;
-        renderer.render(this.scene, Boundary.camera, output.write, false);
+        this.boundary.slab.gridOffset.set(offset[0], offset[1]);
+        this.boundary.uniforms.gridOffset.value = this.boundary.slab.gridOffset;
+        this.renderer.render(this.boundary.slab.scene, Slab.camera, output.write, false);
         this.scene.remove(line);
     },
 
