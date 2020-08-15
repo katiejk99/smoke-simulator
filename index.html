@@ -93,9 +93,10 @@
         <div class="padded">
             <h2 align="left">Overview</h2>
             <p align="justify">
-                We created a smoke simulator using Three.js framework and WebGL (encapsulated within Three.js). 
-                The smoke is animated using three different components - pressure, and density, and temperature. 
-                Each operation that occurs changes these components, which then affects how the smoke is rendered on the screen. 
+                We created a smoke simulator using the Three.js framework and WebGL.
+                The simulator itself models a fluild system with zero viscosity based on the Navier-Stokes equations. The user can
+                then insert color, desnity, and temperature quantities (the "smoke") that applies buoyant forces to the fluid. Additionally,
+                internal values computed at each time step can be visualized for a better understanding of the internals of the simulator.
                 Navigate to the simulation <a href="simulation/index.html">here</a> (or on the navigation bar above). 
                 Also checkout our explanation video <a href="https://www.youtube.com/watch?v=jITxj5rsuUY&feature=youtu.be">here</a>!
 
@@ -104,7 +105,7 @@
             <p align="justify">
                 Three.js was what we used to visualize and animate the simulation. 
                 Then with the help of WebGL, a Javascript API, we were able to include our graphics in the form of a website. 
-                Other tools that we used include dat.gui which created the controller to change what feature of the smoke we're colouring by (i.e. temperature, density, etc.).
+                Other tools that we used include dat.gui to allow the user to adjust certain internal and visualization parameters.
             </p>
             
             <h2 align="left">Concepts</h2>
@@ -149,9 +150,8 @@
                     </td>
                     <td>
                         <p align="justify">
-                            At every time step, we update the velocity field of our simulation. 
-                            The three main updates that occur to the velocity field is advection, external forces, and projection. 
-                            Other fluids may also include a diffusion step (to add viscosity), but the viscosity of smoke is nearly non-existent and thus the step is skipped.       
+                            The main pipeline executed at each time step is used to determine the next velocity field of the fluid by computing and applying the components determined
+                            by the Navier-Stokes Equations. In addition to this pipeline, a benign "ink" value is also advected to for the sake of visualizing the smoke.
                 
                         </p>
                     </td>
@@ -232,6 +232,26 @@
             Other shaders were made for the purpose of visualizing the different quantity fields that were being utilized. The sole purpose of these shaders were to map values on a field to corresponding
             color values. As most of our fields were scalar values, we simply used a scale and biasing scheme for this conversion. For our velocity field, we went with a different scheme of mapping a 
             vector's direction and magnitude to a color's hue and value, respectively, in respect to the HSV color scheme.
+        </p>
+
+
+        <h2 align="middle">Bugs/Future Goals</h2>
+        <p align="justify">
+            While most known issues seem to have been fixed, we are aware of a few shortcomings of our simulator:
+            <ul>
+                <li>Upon clicking the mouse, the point of creating for the smoke does not line up with the center of the mouse. While an attempt was made to rectify this, priority was given to non-ui elements for this project. </li>
+                <li>The environment does not scale accordingly after resizing the window. Once again, this has not been resolved to our focus on non-ui elements. </li>
+                <li>While not necessarily a bug, the simulator can be pretty computationally expensive. It would be prudent to look into some methods to optimize the pipeline.</li>
+            </ul>
+
+            Additionally, there are some additional features that we would like to have implemented in the future:
+            <ul>
+                <li>An attempt was made to include a rectangular boundary to the enviornment, but it wasn't operational by the time of submission.</li>
+                <li>As a step farther from the previous goal, we would also like to have the ability to include more complicated boundary objects (e.g. a sphere)</li>
+                <li>As mentioned previously, the ability to apply forces onto the fluid through the movement of the mouse would add good interactivity.</li>
+                <li>Incorporating a diffusion element to our pipeline would allow us to simulate more viscous fluids</li>
+                <li>Adding a vorticity step to our pipeline to attempt to more accurately mimic turbulent motion.</li>
+            </ul>
         </p>
             <h3 align="left">References</h3>
             <p align="justify">
