@@ -7,6 +7,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Oswald', sans-serif;
+            background-color:#ddd;
 
         }
 
@@ -59,8 +60,6 @@
     <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
 </head>
 <body>
-   
- 
         <ul class="navbar">
             <li class="navitem">
                 <a class="active" href="index.html" title="Main page">Home</a>
@@ -70,17 +69,22 @@
             </li>
         </ul>
 
-    <h1 align="middle">CS 184: Computer Graphics and Imaging, Summer 2020</h1>
-
-    <h1 align="middle">Final Project: Smoke Simulator</h1>
-    <h2 align="middle">Nishant Kalonia | Katie Kim | Yifan Zhang</h2>
+    <h1 align="middle">2D Smoke Simulator</h1>
+    <h2 align="middle">Nishant Kalonia | <a href="https://github.com/katiejk99">Katie Kim</a> | Yifan Zhang</h2>
     
     <div class="padded">
         <h2 align="middle">Overview</h2>
         <p align="justify">
-            We decided to build a 
+            We created a smoke simulator using Three.js framework and WebGL (encapsulated within Three.js). 
+            The smoke is animated using three different components - pressure, and density, and temperature. 
+            Each operation that occurs changes these components, which then affects how the smoke is rendered on the screen. 
 
         </p>
+        <h2 align="middle">Frameworks and Web Tool</h2>
+        <p align="justify">
+            Three.js was what we used to visualize and animate the simulation. 
+            Then with the help of WebGL, a Javascript API, we were able to include our graphics in the form of a website. 
+            Other tools that we used include dat.gui which created the controller to change what feature of the smoke we're colouring by (i.e. temperature, density, etc.).</p>
         <h2 align="middle">Shaders</h2>
 		<p align="justify">
 			

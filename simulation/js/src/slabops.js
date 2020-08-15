@@ -36,7 +36,7 @@ function Boundary(width, height, fs, uniforms) {
     this.temp = this.state.clone();
 
 	var material = new THREE.ShaderMaterial({
-		uniforms: this.uniforms,
+		uniforms: uniforms,
 		fragmentShader: fs,
 		depthWrite: false,
 		depthTest: false,
@@ -66,7 +66,7 @@ function Boundary(width, height, fs, uniforms) {
     }
 
     var geometryL = new THREE.BufferGeometry();
-    geometryL.addAttribute('position', new THREE.BufferAttribute(verticesL, 3));
+    geometryL.setAttribute('position', new THREE.BufferAttribute(verticesL, 3));
     this.lineL = new THREE.Line(geometryL, material);
 
     //Right Line
@@ -77,7 +77,7 @@ function Boundary(width, height, fs, uniforms) {
     }
 
     var geometryR = new THREE.BufferGeometry();
-    geometryR.addAttribute('position', new THREE.BufferAttribute(verticesR, 3));
+    geometryR.setAttribute('position', new THREE.BufferAttribute(verticesR, 3));
     this.lineR = new THREE.Line(geometryR, material);
 
     //Bottom Line
@@ -88,7 +88,7 @@ function Boundary(width, height, fs, uniforms) {
     }
 
     var geometryB = new THREE.BufferGeometry();
-    geometryB.addAttribute('position', new THREE.BufferAttribute(verticesB, 3));
+    geometryB.setAttribute('position', new THREE.BufferAttribute(verticesB, 3));
     this.lineB = new THREE.Line(geometryB, material);
 
 
@@ -100,7 +100,7 @@ function Boundary(width, height, fs, uniforms) {
     }
 
     var geometryT = new THREE.BufferGeometry();
-    geometryT.addAttribute('position', new THREE.BufferAttribute(verticesT, 3));
+    geometryT.setAttribute('position', new THREE.BufferAttribute(verticesT, 3));
     this.lineT = new THREE.Line(geometryT, material);
 
 
@@ -123,12 +123,10 @@ Slab.defaultGeometry = new THREE.PlaneBufferGeometry(2, 2);
 
 
 var SLABOPS_SHADER_NAMES = {
-<<<<<<< HEAD
+
 	boundary: 'Boundary.fs',
     advect: 'Advection.fs',
-=======
-    advect: 'advect.fs',
->>>>>>> parent of 8a9d630... Fixed Advection
+
     divergence: 'Divergence.fs',
     pressure: 'JacobiVectors.fs',
     gradient: 'Gradient.fs',
@@ -369,7 +367,7 @@ SlabOps.prototype = {
         this.renderLine(renderer, this.lineR, [-1,  0], this.velocity);
         this.renderLine(renderer, this.lineB, [ 0,  1], this.velocity);
         this.renderLine(renderer, this.lineT, [ 0, -1], this.velocity);
-    }
+    },
 
     renderLine: function(renderer, line, offset, output) {
     	this.scene.add(line);
@@ -377,7 +375,7 @@ SlabOps.prototype = {
         this.uniforms.gridOffset.value = this.gridOffset;
         renderer.render(this.scene, Boundary.camera, output.write, false);
         this.scene.remove(line);
-    }
+    },
 
     advectSlab: function(slab) {
         // Advection
