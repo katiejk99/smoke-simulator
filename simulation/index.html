@@ -4,7 +4,7 @@
   
   <head>
     <meta charset="UTF-8">
-    <title>Smoke Simulator | CS184</title>
+    <title>Smoke Simulator</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredericka+the+Great&family=Oswald:wght@300&display=swap" rel="stylesheet">   
     <style>
     
@@ -52,12 +52,14 @@
       .active {
         background-color: #ff69b4;
       }
-      
-      
+      div.main { 
+            margin-top:60px;
+        }
       
     </style>
   </head>
   <body>
+    
     <div class="gui">
       <div>
         <ul class="navbar">
@@ -73,6 +75,11 @@
 
         </ul>
       </div>
+     
+        <p align="justify">
+            Click down with left mouse to create smoke. 
+        </p>
+    
       <script src="js/ext/three.min.js"></script>
       <script src="js/ext/dat.gui.min.js"></script>
       <script src="js/src/mouse.js"></script>
@@ -80,6 +87,6 @@
       <script src="js/src/slabops.js"></script>
       <script src="js/src/main.js"></script>
     </div>
-    
+  
   </body>
 </html>
