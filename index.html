@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300&display=swap" rel="stylesheet">    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Oswald', sans-serif;
+            background-color:#ddd;
+
+        }
+
+        div.main { 
+            margin-top:60px;
+        }
+        div.padded {
+            padding-top: 0px;
+            padding-right: 200px;
+            padding-bottom: 0.25in;
+            padding-left: 200px;
+        }
+
+        img.three {
+            width: 330px;
+        }
+
+        img.two {
+            width: 400px;
+        }
+
+        ul.navbar {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+            position: fixed; /* Set the navbar to fixed position */
+            top: 0; /* Position the navbar at the top of the page */
+            width: 100%; /* Full width */
+        }
+        li.navitem {
+            display: inline;
+            float: left;
+        }
+
+        li.navitem a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        li.navitem a:hover:not(.active) {
+            background-color: #111;
+        }
+
+        .active {
+            background-color: #ff69b4;
+        }
+        
+        td {
+            padding:10px;
+        }
+        
+
+    </style>
+    <title>Smoke Simulator</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+        <ul class="navbar">
+            <li class="navitem">
+                <a class="active" href="index.html" title="Main page">Home</a>
+            </li>
+            <li class="navitem">
+                <a href="extra.html" title="Contributors">Contributors</a>
+            </li>
+            <li class="navitem">
+                <a href="simulation/index.html" title="Simulation">Simulation</a>
+            </li>
+            
+        </ul>
+    <div class="main">
+
+    
+        <h1 align="middle" >2D Smoke Simulator</h1>
+        <h2 align="middle">Nishant Kalonia || Katie Kim || Yifan Zhang</h2>
+        <h3 align="middle">Summer 2020</h3>
+        
+        <div class="padded">
+            <h2 align="left">Overview</h2>
+            <p align="justify">
+                We created a smoke simulator using Three.js framework and WebGL (encapsulated within Three.js). 
+                The smoke is animated using three different components - pressure, and density, and temperature. 
+                Each operation that occurs changes these components, which then affects how the smoke is rendered on the screen. 
+                Navigate to the simulation <a href="simulation/index.html">here</a> (or on the navigation bar above). 
+                Also checkout our explanation video <a href="https://www.youtube.com/watch?v=jITxj5rsuUY&feature=youtu.be">here</a>!
+
+            </p>
+            <h2 align="left">Frameworks and Web Tool</h2>
+            <p align="justify">
+                Three.js was what we used to visualize and animate the simulation. 
+                Then with the help of WebGL, a Javascript API, we were able to include our graphics in the form of a website. 
+                Other tools that we used include dat.gui which created the controller to change what feature of the smoke we're colouring by (i.e. temperature, density, etc.).
+            </p>
+            
+            <h2 align="left">Concepts</h2>
+		    <p align="justify">
+                The formulas used to compute the flow of the fluid at each time step were derived from the Navier-Stokes Equations for incompressible flow:
+
+                From this equation, we can see that the movement of a fluid at a point is determined by four components:
+                <ol>
+                    <li>
+                        Advection: Transportation of quantities in the fluid in relation to the fluid's vector field. In fact, the fluid even advects it's own veclocity field.
+                    </li>
+                    <li>
+                        Pressure: The internal forces of the fluid caused by it colliding with itself. Computationally, this will be the most expensive field to track.
+                    </li>
+                    <li>
+                        Diffusion: A factor determining the viscosity of the fluid. Air particles have nealy zero viscosity, so this field was ignored.
+                    </li>
+                    <li>
+                        External Forces: Whatever external forces are currently acting on the fluid. Since we are creating a smoke simulator, we will have to account for a buoyant force in order for the smoke to rise.
+                    </li>
+                </ol>
+                
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="img/stokes_1.jpg" align="middle">
+                        <figcaption align="middle"></figcaption>
+                    </td>
+                    <td>
+                        <img src="img/stokes_2.jpg" align="middle">
+                        <figcaption align="middle"></figcaption>
+                    </td>
+                </tr>
+            </table>
+            <h2 align="left">Pipeline</h2>
+            <table>
+                <tr>
+                    <td>
+                        <img src="img/pipeline.png" width="300px" align="middle">
+                        <figcaption align="middle">visualization of our overall pipeline.</figcaption>
+                    </td>
+                    <td>
+                        <p align="justify">
+                            At every time step, we update the velocity field of our simulation. 
+                            The three main updates that occur to the velocity field is advection, external forces, and projection. 
+                            Other fluids may also include a diffusion step (to add viscosity), but the viscosity of smoke is nearly non-existent and thus the step is skipped.       
+                
+                        </p>
+                    </td>
+                    
+                </tr>
+            </table>
+            
+            <h2 align="left">Shaders</h2>
+            <p align="justify">
+                In order to utilize the GPU to efficiently update a field of values, we utilized shaders to apply operations to our quantity field "textures". A brief description of our
+            utilized shaders is listed below.  
+            </p>
+            
+            <h2 align="left">Advection</h2>
+            <table>
+                <tr>
+                    <td>
+                        <img src="img/fig38-03.jpg" width="300px" align="middle">
+                        <figcaption align="middle">Visualization of Advection</figcaption>
+                    </td>
+                    <td>
+                        <p align="justify">
+                            As said before, <strong>Advection</strong> is the displacement of a quantity via the vector field. Implementation-wise, we used an implicit method to "trace back" a vector quantity at a fragment.
+                            From this backward step, we can bilinearly interpolate the quantity to be advected from the four neighboring fragments, and then update the original fragment with this interpolated
+                            value. This implementation adds the benefit of being a generally more stable, implicit method than being a more traditional forward-step implementation.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+            
+
+            <h2 align="left">External Forces</h2>
+            <table>
+                <tr>
+                    <td>
+                        <img src="img/external force.png" width="400px" align="middle">
+                        <figcaption align="middle">In depth visualization of <i>external forces</i> component in main pipeline</figcaption>
+                    </td>
+                    <td>
+                        <p align="justify">
+                            For our implementation, the only external force to be considered. This force was determined by separate temperature and density fields that were advected by the velocity field
+                            at the beginning of each time step.
+                            As a future endeavor, we would like to incorporate an additional external foce that would be created by the movement of the mouse.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            
+
+            <h2 align="left">Projection</h2>
+            <table>
+                <tr>
+                    <td>
+                        <img src="img/projection.png" width="400px" align="middle">
+                        <figcaption align="middle">In depth visualization of the <i>projection</i> component in main pipeline</figcaption>
+                    </td>
+                    <td>
+                        <p align="justify">
+                            This step updates the velocity field to account for pressure. There are three steps that occur during this phase:
+                            <ol>
+                                <li>Computing the divergence of the velocity field.</li>
+                                <li>Solving the Poisson equation for pressure p using Jacobi iteration.</li>
+                                <li>Subtracting the Gradient of p from the velocity field.</li>
+                            </ol>
+                            A seperate shader was used for each of these steps. The actual solving for the pressure equation is an iterative method that introduces a trade-off between accuracy and computation
+                            resources: the more times the Jacobi operator is applied to our pressure field, the more convergent out computer pressure becomes. It was recommended to us to run somewhere between 40-50
+                            operations per time step, and never going below 20.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+            
+        <h2 align="left">Additional Shaders</h2>
+        <p align="justify">
+            Additional shaders were used to enhance the user experience. A "splat" shader was created to add a quantity across a field in the form of a gaussian distribution. When the user clicks
+            the mouse, this shader is used to insert "smoke" (or, more precisely, color, density, and temperature quantities).
+            Other shaders were made for the purpose of visualizing the different quantity fields that were being utilized. The sole purpose of these shaders were to map values on a field to corresponding
+            color values. As most of our fields were scalar values, we simply used a scale and biasing scheme for this conversion. For our velocity field, we went with a different scheme of mapping a 
+            vector's direction and magnitude to a color's hue and value, respectively, in respect to the HSV color scheme.
+        </p>
+            <h3 align="left">References</h3>
+            <p align="justify">
+                <ul>
+                    <li><a href="https://github.com/mharrys/fluids-2d">Github of similar project</a></li>
+                    <li><a href="https://developer.nvidia.com/gpugems/gpugems/part-vi-beyond-triangles/chapter-38-fast-fluid-dynamics-simulation-gpu">GPU Gems</a></li>
+                    <li><a href="https://en.wikipedia.org/wiki/Jacobi_method">Jacobi Method</a></li>
+                </ul>
+            </p>
+
+            
+        </div>
+    </div>
+    
+</body>
+</html>
