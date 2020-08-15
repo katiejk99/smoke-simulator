@@ -84,12 +84,55 @@
         <p align="justify">
             Three.js was what we used to visualize and animate the simulation. 
             Then with the help of WebGL, a Javascript API, we were able to include our graphics in the form of a website. 
-            Other tools that we used include dat.gui which created the controller to change what feature of the smoke we're colouring by (i.e. temperature, density, etc.).</p>
+            Other tools that we used include dat.gui which created the controller to change what feature of the smoke we're colouring by (i.e. temperature, density, etc.).
+        </p>
+        
+        <h2 align="middle">Pipeline</h2>
+        <table>
+            <tr>
+                <td>
+                    <p align="justify">
+                        Every time step we update the velocity field of our simulation. 
+                        The three main updates that occur to the velocity field is advection, external forces, and projection. 
+                        Other fluids may also include a diffusion step (to add viscosity), but the viscosity of smoke is nearly non-existent and thus the step is skipped.       
+            
+                    </p>
+                </td>
+                <td>
+                    <img src="pipeline.png" width="330px" align="middle">
+                    <figcaption align="middle">visualization of our overall pipeline.</figcaption>
+                </td>
+            </tr>
+        </table>
+        
         <h2 align="middle">Shaders</h2>
 		<p align="justify">
-			
-		</p>
+            Each operation that we implemented was represented using a fragment shader. 
+            The main shaders included <i>Advection</i>, <i>External Forces</i>, and <i>Projection</i>.  
+        </p>
         
+        <h2 align="middle">Advection</h2>
+        <p align="justify">
+            Here we updated the velocity field based on the velocity field.
+        </p>
+
+        <h2 align="middle">External Forces</h2>
+        <p align="justify">
+            The velocity field is updated to account for any external forces acting upon the field. 
+            For our case the only external force is buoyancy. 
+            The buoyant force at a particular fragment is determined by a temperature and density field that is advected by the velocity field at the beginning of each time step.
+        </p>
+
+        <h2 align="middle"></h2>
+        <p align="justify">
+            This portion involves three steps: 
+            <ol>
+                <li>Compute the divergence of the velocity field.</li>
+                <li>Solving the Poisson equation for pressure p using Jacobi iteration.</li>
+                <li>Subtracting the Gradient of p from the velocity field.</li>
+            </ol>
+            
+        </p>
     </div>
 
     
