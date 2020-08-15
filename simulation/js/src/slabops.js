@@ -169,9 +169,8 @@ var SlabOps = function(shaderFiles, renderer, slabWidth, slabHeight) {
         gridOffset: {
             type: "v2",
         },
-        gridScale: {
+        scale: {
             type: "f",
-            value: this.gridScale
         },
     };
     this.boundary.slab = new Boundary(this.slabSize.width, this.slabSize.height, shaderFiles.get(SLABOPS_SHADER_NAMES.boundary), this.boundary.uniforms);
@@ -354,12 +353,13 @@ SlabOps.prototype = {
         this.advectSlab(this.ink.slab);
         this.advectSlab(this.buoyancy.slab);
         this.advectSlab(this.advect.slab);
-        this.boundarySlab(this.advect.slab);
+        //this.boundarySlab(this.advect.slab, -1);
         this.buoySlab(this.advect.slab);
         this.projectSlab(this.advect.slab);
     },
 
-    boundarySlab: function(slab) {
+    boundarySlab: function(slab, scale) {
+        this.boundary.uniforms.scale.value = scale;
         this.renderLine(this.renderer, this.boundary.slab.lineL, [ 1,  0], slab);
         this.renderLine(this.renderer, this.boundary.slab.lineR, [-1,  0], slab);
         this.renderLine(this.renderer, this.boundary.slab.lineB, [ 0,  1], slab);
