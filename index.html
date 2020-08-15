@@ -76,8 +76,12 @@
                 <a class="active" href="index.html" title="Main page">Home</a>
             </li>
             <li class="navitem">
+                <a href="extra.html" title="Contributors">Contributors</a>
+            </li>
+            <li class="navitem">
                 <a href="simulation/index.html" title="Simulation">Simulation</a>
             </li>
+            
         </ul>
     <div class="main">
 
@@ -85,12 +89,6 @@
         <h1 align="middle" >2D Smoke Simulator</h1>
         <h2 align="middle">Nishant Kalonia || Katie Kim || Yifan Zhang</h2>
         <h3 align="middle">Summer 2020</h3>
-    
-       
-
-        
-
-        
         
         <div class="padded">
             <h2 align="left">Overview</h2>
@@ -113,8 +111,6 @@
             <h2 align="left">Concepts</h2>
 		    <p align="justify">
                 The formulas used to compute the flow of the fluid at each time step were derived from the Navier-Stokes Equations for incompressible flow:
-                    <img src="img/stokes_1.jpg" width="100" align="middle">
-                    <img src="img/stokes_2.jpg" width="100" align="middle">
 
                 From this equation, we can see that the movement of a fluid at a point is determined by four components:
                 <ol>
@@ -132,7 +128,19 @@
                     </li>
                 </ol>
                 
-		    </p>
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="img/stokes_1.jpg" align="middle">
+                        <figcaption align="middle"></figcaption>
+                    </td>
+                    <td>
+                        <img src="img/stokes_2.jpg" align="middle">
+                        <figcaption align="middle"></figcaption>
+                    </td>
+                </tr>
+            </table>
             <h2 align="left">Pipeline</h2>
             <table>
                 <tr>
@@ -142,49 +150,59 @@
                     </td>
                     <td>
                         <p align="justify">
-                            The main pipeline executed at each time step is used to determin the next velocity field of the fluid by computing and applying the components determined
-                            by the Navier-Stokes Equations. In addition to this pipeline, a benign "ink" value is also advected to for the sake of visualizing the smoke.       
+                            The main pipeline executed at each time step is used to determine the next velocity field of the fluid by computing and applying the components determined
+                            by the Navier-Stokes Equations. In addition to this pipeline, a benign "ink" value is also advected to for the sake of visualizing the smoke.
                 
                         </p>
                     </td>
                     
                 </tr>
             </table>
-
-            <h2 align="middle">Shaders</h2>
-		<p align="justify">
-            In order to utilize the GPU to efficiently update a field of values, we utilized shaders to apply operations to our quantity field "textures". A brief description of our
+            
+            <h2 align="left">Shaders</h2>
+            <p align="justify">
+                In order to utilize the GPU to efficiently update a field of values, we utilized shaders to apply operations to our quantity field "textures". A brief description of our
             utilized shaders is listed below.  
-        </p>
-        
-        <h2 align="middle">Advection</h2>
-        <p align="justify">
-            As said before, advection is the displacement of a quantity via the vector field. Implementation-wise, we used an implicit method to "trace back" a vector quantity at a fragment.
-            From this backward step, we can bilinearly interpolate the quantity to be advected from the four neighboring fragments, and then update the original fragment with this interpolated
-            value. This implementation adds the benefit of being a generally more stable, implicit method than being a more traditional forward-step implementation.
-        </p>
-
-        <h2 align="middle">External Forces</h2>
-        <p align="justify">
+            </p>
+            
+            <h2 align="left">Advection</h2>
             <table>
-            <tr>
-                <td>
-                    <img src="img/external force.png" width="400px" align="middle">
-                    <figcaption align="middle">In depth visualization of <i>external forces</i> component in main pipeline</figcaption>
-                </td>
-                <td>
-                    <p align="justify">
-                        For our implementation, the only external force to be considered. This force was determined by separate temperature and density fields that were advected by the velocity field
-                        at the beginning of each time step.
-                        As a future endeavor, we would like to incorporate an additional external foce that would be created by the movement of the mouse.
-                    </p>
-                </td>
-            </tr>
+                <tr>
+                    <td>
+                        <img src="img/fig38-03.jpg" width="300px" align="middle">
+                        <figcaption align="middle">Visualization of Advection</figcaption>
+                    </td>
+                    <td>
+                        <p align="justify">
+                            As said before, <strong>Advection</strong> is the displacement of a quantity via the vector field. Implementation-wise, we used an implicit method to "trace back" a vector quantity at a fragment.
+                            From this backward step, we can bilinearly interpolate the quantity to be advected from the four neighboring fragments, and then update the original fragment with this interpolated
+                            value. This implementation adds the benefit of being a generally more stable, implicit method than being a more traditional forward-step implementation.
+                        </p>
+                    </td>
+                </tr>
             </table>
-        </p>
+            
 
-        <h2 align="middle">Projection</h2>
-        <p align="justify">
+            <h2 align="left">External Forces</h2>
+            <table>
+                <tr>
+                    <td>
+                        <img src="img/external force.png" width="400px" align="middle">
+                        <figcaption align="middle">In depth visualization of <i>external forces</i> component in main pipeline</figcaption>
+                    </td>
+                    <td>
+                        <p align="justify">
+                            For our implementation, the only external force to be considered. This force was determined by separate temperature and density fields that were advected by the velocity field
+                            at the beginning of each time step.
+                            As a future endeavor, we would like to incorporate an additional external foce that would be created by the movement of the mouse.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            
+
+            <h2 align="left">Projection</h2>
             <table>
                 <tr>
                     <td>
@@ -195,22 +213,19 @@
                         <p align="justify">
                             This step updates the velocity field to account for pressure. There are three steps that occur during this phase:
                             <ol>
-                                <li>Compute the divergence of the velocity field.</li>
+                                <li>Computing the divergence of the velocity field.</li>
                                 <li>Solving the Poisson equation for pressure p using Jacobi iteration.</li>
                                 <li>Subtracting the Gradient of p from the velocity field.</li>
                             </ol>
                             A seperate shader was used for each of these steps. The actual solving for the pressure equation is an iterative method that introduces a trade-off between accuracy and computation
                             resources: the more times the Jacobi operator is applied to our pressure field, the more convergent out computer pressure becomes. It was recommended to us to run somewhere between 40-50
-                            operations per time step, and never going below 20.     
-                                        
+                            operations per time step, and never going below 20.
                         </p>
                     </td>
                 </tr>
             </table>
             
-        </p>
-
-        <h2 align="middle">Additional Shaders</h2>
+        <h2 align="left">Additional Shaders</h2>
         <p align="justify">
             Additional shaders were used to enhance the user experience. A "splat" shader was created to add a quantity across a field in the form of a gaussian distribution. When the user clicks
             the mouse, this shader is used to insert "smoke" (or, more precisely, color, density, and temperature quantities).
@@ -238,17 +253,16 @@
                 <li>Adding a vorticity step to our pipeline to attempt to more accurately mimic turbulent motion.</li>
             </ul>
         </p>
-
-        
-            
             <h3 align="left">References</h3>
             <p align="justify">
                 <ul>
                     <li><a href="https://github.com/mharrys/fluids-2d">Github of similar project</a></li>
                     <li><a href="https://developer.nvidia.com/gpugems/gpugems/part-vi-beyond-triangles/chapter-38-fast-fluid-dynamics-simulation-gpu">GPU Gems</a></li>
-                    <li><a href="https://en.wikipedia.org/wiki/Jacobi\_method">Jacobi Method</a></li>
+                    <li><a href="https://en.wikipedia.org/wiki/Jacobi_method">Jacobi Method</a></li>
                 </ul>
             </p>
+
+            
         </div>
     </div>
     

@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>Smoke Simulator | CS184</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredericka+the+Great&family=Oswald:wght@300&display=swap" rel="stylesheet">   
+    <style>
+    body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Oswald', sans-serif;
+            background-color:#ddd;
+
+        }
+
+        div.main { 
+            margin-top:60px;
+        }
+        div.padded {
+            padding-top: 0px;
+            padding-right: 200px;
+            padding-bottom: 0.25in;
+            padding-left: 200px;
+        }
+
+        img.three {
+            width: 330px;
+        }
+
+        img.two {
+            width: 400px;
+        }
+
+        ul.navbar {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+            position: fixed; /* Set the navbar to fixed position */
+            top: 0; /* Position the navbar at the top of the page */
+            width: 100%; /* Full width */
+        }
+        li.navitem {
+            display: inline;
+            float: left;
+        }
+
+        li.navitem a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        li.navitem a:hover:not(.active) {
+            background-color: #111;
+        }
+
+        .active {
+            background-color: #ff69b4;
+        }
+        
+        td {
+            padding:10px;
+        }
+      
+    </style>
+  </head>
+  <body>
+      <div class="main">
+    <h1 align="middle">Contributors</h1>
+    <ul class="navbar">
+        <li class="navitem">
+            <a href="index.html" title="Main page">Home</a>
+        </li>
+        <li class="navitem">
+            <a class="active" href="extra.html" title="Contributors">Contributors</a>
+        </li>
+        <li class="navitem">
+            <a href="simulation/index.html" title="Simulation">Simulation</a>
+        </li>
+        
+    </ul>
+    <div class="padded">
+        <table>
+            
+            <tr>
+                
+                <td>
+                    <img src="img/nishant.jpg" width="400px" align="middle">
+                    
+                </td>
+                <td>
+                    <h2 align="left">Nishant Kalonia</h2>
+                    <p align="justify">
+                        Nishant worked on creating the framework for computational pipeline and UI controls, writing shaders for visualizing scalar and vector quantities, implementing method to add smoke elements to the environment, debugging in general, and writing the milestone deliverable.
+
+                    </p>
+                </td>
+            </tr>
+            
+            <tr>
+                
+                
+                <td>
+                    <h2 align="left">Katie Kim</h2>
+                    <p align="justify">
+                        Katie worked on the web design&mdash;incuding both simulation html and main index html (and the current fun extra page), including js files for <i>dat.gui</i> and <i>three.js</i>, debugging mouse positioning, helped with debugging shaders, and creating the <a href="CS184_Final_Project.pdf">final presentation</a>. 
+
+                    </p>
+                </td>
+                <td>
+                    <img src="img/katie.jpg" width="400px" align="middle">
+                </td>
+            </tr>
+           
+            <tr>
+                
+                <td>
+                    <img src="img/yifan.jpg" width="400px" align="middle">
+                </td>
+                <td>
+                    <h2 align="left">Yifan Zhang</h2>
+                    <p align="justify">
+                        Yifan worked on implementing fragment shaders (advection, divergence, gradient, jacobi), project proposal, and creating the <a href="https://www.youtube.com/watch?v=jITxj5rsuUY&feature=youtu.be">final video demo</a>.
+
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+  </body>
+</html>
