@@ -16,9 +16,9 @@
         }
         div.padded {
             padding-top: 0px;
-            padding-right: 150px;
+            padding-right: 200px;
             padding-bottom: 0.25in;
-            padding-left: 150px;
+            padding-left: 200px;
         }
 
         img.three {
@@ -85,6 +85,12 @@
         <h1 align="middle" >2D Smoke Simulator</h1>
         <h2 align="middle">Nishant Kalonia || Katie Kim || Yifan Zhang</h2>
         <h3 align="middle">Summer 2020</h3>
+    
+       
+
+        
+
+        
         
         <div class="padded">
             <h2 align="left">Overview</h2>
@@ -103,6 +109,27 @@
                 Other tools that we used include dat.gui which created the controller to change what feature of the smoke we're colouring by (i.e. temperature, density, etc.).
             </p>
             
+            <h2 align="left">Concepts</h2>
+		    <p align="justify">
+                The formulas used to compute the flow of the fluid at each time step were derived from the Navier-Stokes Equations for incompressible flow:
+
+                From this equation, we can see that the movement of a fluid at a point is determined by four components:
+                <ol>
+                    <li>
+                        Advection: Transportation of quantities in the fluid in relation to the fluid's vector field. In fact, the fluid even advects it's own veclocity field.
+                    </li>
+                    <li>
+                        Pressure: The internal forces of the fluid caused by it colliding with itself. Computationally, this will be the most expensive field to track.
+                    </li>
+                    <li>
+                        Diffusion: A factor determining the viscosity of the fluid. Air particles have nealy zero viscosity, so this field was ignored.
+                    </li>
+                    <li>
+                        External Forces: Whatever external forces are currently acting on the fluid. Since we are creating a smoke simulator, we will have to account for a buoyant force in order for the smoke to rise.
+                    </li>
+                </ol>
+                
+		    </p>
             <h2 align="left">Pipeline</h2>
             <table>
                 <tr>
@@ -130,19 +157,20 @@
             
             <h2 align="left">Advection</h2>
             <p align="justify">
-                Here we updated the velocity field based on the velocity field.
+                As said before, Advection is the displacement of a quantity via the vector field. Implementation-wise, we used an implicit method to "trace back" a vector quantity at a fragment.
+            From this backward step, we can bilinearly interpolate the quantity to be advected from the four neighboring fragments, and then update the original fragment with this interpolated
+            value. This implementation adds the benefit of being a generally more stable, implicit method than being a more traditional forward-step implementation.
             </p>
 
             <h2 align="left">External Forces</h2>
             <table>
                 <tr>
                     <td>
-                        <img src="img/external force.png" width="300px" align="middle">
+                        <img src="img/external force.png" width="400px" align="middle">
                         <figcaption align="middle">In depth visualization of <i>external forces</i> component in main pipeline</figcaption>
                     </td>
                     <td>
                         <p align="justify">
-                            The velocity field is updated to account for any external forces acting upon the field. 
                             For our case the only external force is buoyancy. 
                             The buoyant force at a particular fragment is determined by a temperature and density field that is advected by the velocity field at the beginning of each time step.
                         </p>
@@ -156,7 +184,7 @@
             <table>
                 <tr>
                     <td>
-                        <img src="img/projection.png" width="300px" align="middle">
+                        <img src="img/projection.png" width="400px" align="middle">
                         <figcaption align="middle">In depth visualization of the <i>projection</i> component in main pipeline</figcaption>
                     </td>
                     <td>
