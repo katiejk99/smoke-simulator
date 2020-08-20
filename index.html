@@ -95,10 +95,10 @@
             <p align="justify">
                 We created a smoke simulator using the Three.js framework and WebGL.
                 The simulator itself models a fluild system with zero viscosity based on the Navier-Stokes equations. The user can
-                then insert color, desnity, and temperature quantities (the "smoke") that applies buoyant forces to the fluid. Additionally,
+                then insert color, density, and temperature quantities (the "smoke") that applies buoyant forces to the fluid. Additionally,
                 internal values computed at each time step can be visualized for a better understanding of the internals of the simulator.
                 Navigate to the simulation <a href="simulation/index.html">here</a> (or on the navigation bar above). 
-                Also checkout our explanation video <a href="https://www.youtube.com/watch?v=jITxj5rsuUY&feature=youtu.be">here</a>!
+                Also check out our explanation video <a href="https://www.youtube.com/watch?v=jITxj5rsuUY&feature=youtu.be">here</a>!
                 Note: This simulator has only been tested for Google Chrome.
 
             </p>
@@ -127,7 +127,7 @@
                     </td>
                 </tr>
             </table>
-            <p>
+            <p align="justify">
                 From this equation, we can see that the movement of a fluid at a point is determined by four components:
                 <ol>
                     <li>
@@ -178,7 +178,7 @@
                     </td>
                     <td>
                         <p align="justify">
-                            As said before, <strong>Advection</strong> is the displacement of a quantity via the vector field. Implementation-wise, we used an implicit method to "trace back" a vector quantity at a fragment.
+                            As said before, <strong>advection</strong> is the displacement of a quantity via the vector field. Implementation-wise, we used an implicit method to "trace back" a vector quantity at a fragment.
                             From this backward step, we can bilinearly interpolate the quantity to be advected from the four neighboring fragments, and then update the original fragment with this interpolated
                             value. This implementation adds the benefit of being a generally more stable, implicit method than being a more traditional forward-step implementation.
                         </p>
@@ -196,7 +196,7 @@
                     </td>
                     <td>
                         <p align="justify">
-                            For our implementation, the only external force to be considered. This force was determined by separate temperature and density fields that were advected by the velocity field
+                            For our implementation, the only external force to be considered was <strong>buoyancy</strong>. This force was determined by separate temperature and density fields that were advected by the velocity field
                             at the beginning of each time step.
                             As a future endeavor, we would like to incorporate an additional external foce that would be created by the movement of the mouse.
                         </p>
